@@ -5,21 +5,57 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class LearningManagementSystem {
-	private Teacher teacher;
-	private Student student;
+	private static Teacher teacher;
+	private static Student student;
+
+	private static String userName;
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		Scanner sc = new Scanner(System.in);
 
-		Introduction(sc);
-//		Assignment assignment = new Assignment("Homework 1", 10.0, 2);
+//		
+//		Assignment assignment = new Assignment("Assignment 1", 1, 2, "tony");
 //		assignment.createQuestions();
-//		System.out.println(assignment.toString());
-//		assignment.takeAssignment();
-//		assignment.correctVsStudent();
+		Introduction(sc);
+		allChoices(sc, teacher, student);
 	}
-	
+
+	public static void allChoices(Scanner sc, Teacher teacher, Student student) throws IOException {
+		if ((teacher == null && student == null) || (teacher != null && student != null)) {
+			throw new IllegalArgumentException("User is neither a teacher nor a student");
+		}
+		System.out.println("\n\n\n");
+		String choice = "";
+
+		System.out.println("Welcome, please select the option by typing the number.");
+		while (!choice.equals("log out")) {
+			// teacher choices
+			if (teacher != null && student == null) {
+				System.out.println("1. Create Assignment");
+				System.out.println("2. log out");
+				choice = sc.nextLine();
+
+				if (choice.equals("1")) {
+					teacher.createAssignment(sc);
+				}
+				if (choice.equals("2")) {
+					choice = "log out";
+				}
+
+			}
+			// student choices
+			else {
+				System.out.println("1. log out");
+
+				choice = sc.nextLine();
+				if (choice.equals("1")) {
+					choice = "log out";
+				}
+			}
+		}
+	}
+
 	// introduction for the program
 	// logs the user in as a teacher or a student/
 	// pre: none
@@ -34,19 +70,53 @@ public class LearningManagementSystem {
 		if (choice.toLowerCase().equals("log in")) {
 			logIn(sc, logins);
 		} else if (choice.toLowerCase().equals("create")) {
-			System.out.print("please create a username: ");
+			// get first name
+			System.out.print("What is your first name: ");
+			String createFirstName = sc.nextLine();
+			userName = createFirstName;
+			System.out.println();
+
+			// choose either teacher or student
+			System.out.print("Are you a teacher or a student: ");
+			String createOccupation = sc.nextLine().toLowerCase();
+			System.out.println();
+			// validate choice for either teacher or student
+			while (!createOccupation.toLowerCase().equals("teacher")
+					&& !createOccupation.toLowerCase().equals("student")) {
+				System.out.println("That is not a valid choice. ");
+				System.out.print("Are you a teacher or a student: ");
+				createOccupation = sc.nextLine().toLowerCase();
+			}
+			// create username
+			System.out.print("Please create a username: ");
 			String createUsername = sc.nextLine();
+			if (createOccupation.equals("teacher")) {
+				createUsername += "_t";
+			} else {
+				createUsername += "_s";
+			}
 			boolean canContinue = false;
 			while (!canContinue) {
 				if (canUseUsername(logins, createUsername)) {
 					canContinue = true;
 					System.out.println();
+					// create password
 					System.out.print("please create a password: ");
 					String createPassword = putIntoHashCode(sc.nextLine());
+					System.out.println();
 
+					// write firstName, userName, password, and occupation into the file.
 					FileWriter fileWriter = new FileWriter(logins.getName(), true);
-					fileWriter.write(createUsername + "\t" + createPassword + "\n");
-					System.out.println("Username and Password sucessfully created!");
+					fileWriter.write(createUsername + "\t" + createPassword + "\t" + createFirstName
+							+ "\t" + createOccupation + "\n");
+					System.out.println("Successfully created an account!");
+
+					// after creating an account, create new instance of either teacher or student
+					if (createOccupation.equals("teacher")) {
+						teacher = new Teacher(createFirstName, createUsername);
+					} else {
+						student = new Student(createFirstName, createUsername);
+					}
 					fileWriter.close();
 				} else {
 					System.out.println("This username is already taken");
@@ -56,7 +126,7 @@ public class LearningManagementSystem {
 			}
 
 		} else {
-
+			// TODO: create loop for not valid entry
 		}
 
 	}
@@ -86,16 +156,15 @@ public class LearningManagementSystem {
 	// checks the logins file for the username and password to log into the system
 	// pre: none
 	// post: logs into the system.
-	private static void logIn(Scanner sc, File logins) throws FileNotFoundException {
+	private static void logIn(Scanner sc, File logins) throws IOException {
 		System.out.print("Enter Username: ");
 		String loginUsername = sc.nextLine();
 		System.out.println();
 		System.out.print("Enter Password: ");
 		String loginPassword = putIntoHashCode(sc.nextLine());
-		if (canLogIn(loginUsername, loginPassword, logins)) {
-			System.out.println("Log in Success!");
-		} else {
-			System.out.println("Log in Failed!");
+		String[] nameAndOcc = foundLogIn(loginUsername, loginPassword, logins);
+		if (nameAndOcc == null) {
+			System.out.println("Log in Failed! Your username or password is wrong!");
 			System.out.print("Would you like to try again?");
 			String choice = sc.nextLine();
 			if (choice.toLowerCase().charAt(0) == 'y') {
@@ -104,35 +173,50 @@ public class LearningManagementSystem {
 				System.out.println("Okay! Thank you!");
 			}
 		}
+//		if (nameAndOcc[1].equals("teacher") || nameAndOcc[1].equals("student")) {
+		System.out.println("Log in Success!");
+		// after logging in, create new instance of teacher or student
+		if (nameAndOcc[1].equals("teacher")) {
+			teacher = new Teacher(nameAndOcc[0], loginUsername);
+		} else {
+			student = new Student(nameAndOcc[0], loginUsername);
+		}
+
 	}
-	
-	// private helper method to scan the entire file for the username + password
-	// pre: none
-	// post: returns true if the username + password was found, false otherwise
-	private static boolean canLogIn(String username, String password, File file)
+
+	// private helper method to log the user in and also figure out if they are a student or a
+	// teacher
+	// pre: file != null
+	// post: returns 'teacher', 'student', or 'not found!'
+	private static String[] foundLogIn(String username, String password, File file)
 			throws FileNotFoundException {
-		boolean found = false;
 		Scanner fileScanner = new Scanner(file);
 		while (fileScanner.hasNext()) {
-			String lineToScan = fileScanner.nextLine();
-			Scanner lineScanner = new Scanner(lineToScan);
-			if (lineScanner.next().equals(username)) {
-				if (lineScanner.next().equals(password)) {
-					lineScanner.close();
-					return true;
-				}
+			String currentLine = fileScanner.nextLine();
+			Scanner lineScanner = new Scanner(currentLine);
+			String currentUsername = lineScanner.next();
+			if (currentUsername.substring(0, currentUsername.length() - 2).equals(username)
+					&& lineScanner.next().equals(password)) {
+				// 0 is name, 1 is occupation
+				String[] nameAndOcc = new String[2];
+				nameAndOcc[0] = lineScanner.next();
+				userName = nameAndOcc[0];
+				fileScanner.close();
+				nameAndOcc[1] = lineScanner.next();
+				lineScanner.close();
+				return nameAndOcc;
 			}
 			lineScanner.close();
 		}
 		fileScanner.close();
-		return found;
+		return null;
 	}
-	
+
 	// creates the file to be used for username/password management
 	// pre: none
 	// post: returns a File
 	private static File createLogins() throws IOException {
-		File allLogins = new File("allLogins.txt");
+		File allLogins = new File("allLogin.txt");
 		if (allLogins.createNewFile()) {
 			System.out.println("DEBUGGING: created new file: " + allLogins.getName());
 		} else {
@@ -142,7 +226,6 @@ public class LearningManagementSystem {
 		return allLogins;
 	}
 
-	
 	// private helper method to help 'encrypt' a password so that it is not obvious
 	// pre: none
 	// post: returns a string of the original password in hexidecimal.

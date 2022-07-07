@@ -1,5 +1,8 @@
-import java.util.HashMap;
 import java.util.TreeMap;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
@@ -9,11 +12,13 @@ public class Assignment {
 	private Grade grade;
 	private String assignmentName;
 	private double gradePercent;
+	private String teacherName;
 
+	private File assignmentFile;
 	// format: Question: {A, B, C, D, Correct}
 	private TreeMap<String, String[]> questionsAndAnswers;
 	private String[] studentAnswers;
-	
+
 	private Scanner sc;
 
 	private int numQuestions;
@@ -24,18 +29,37 @@ public class Assignment {
 	// constructor for the assignment
 	// basic information
 	// pre: numQuestions
-	public Assignment(String name, double gradePercentage, int numQuestions) {
+	public Assignment(String name, double gradePercentage, int numQuestions, String teacherName)
+			throws IOException {
 		sc = new Scanner(System.in);
 		this.assignmentName = name;
+		this.teacherName = teacherName;
 		this.gradePercent = gradePercentage;
 		this.numQuestions = numQuestions;
 		studentAnswers = new String[numQuestions];
+
 		this.grade = new Grade(-1);
 		this.questionsAndAnswers = new TreeMap<String, String[]>();
+		assignmentFile = createFileAssignment();
 	}
 	
 	
-	// getter method for the 
+	public String getAssignmentName() {
+		return this.assignmentName;
+	}
+
+	private File createFileAssignment() throws IOException {
+		File assignmentFile = new File(teacherName + "_" + assignmentName + ".txt");
+		if (assignmentFile.createNewFile()) {
+			System.out.println("Sucessfully created Assignment!");
+		} else {
+			System.out.println("File already exists");
+		}
+
+		return assignmentFile;
+	}
+
+	// getter method for how much this assignment is worth
 	public double viewGradePercent() {
 		return this.gradePercent;
 	}
@@ -61,10 +85,10 @@ public class Assignment {
 		return true;
 	}
 
-	// fills the HashMap of Q and A for the assignment
+	// fills the HashMap of Q and A for the assignment and writes it to the file
 	// pre: none
 	// post: updates
-	public void createQuestions() {
+	public void createQuestions() throws IOException {
 		System.out.println(createQuestionIntro());
 		System.out.println("SIZE: " + numQuestions);
 		for (int qNum = 0; qNum < numQuestions; qNum++) {
@@ -79,9 +103,13 @@ public class Assignment {
 			}
 			System.out.print("What is the correct answer: ");
 			answers[answers.length - 1] = sc.nextLine();
-
-			questionsAndAnswers.put(question, answers);
+			questionsAndAnswers.put("Question " + (qNum + 1) + ":" + question, answers);
 		}
+		FileWriter fileWriter = new FileWriter(assignmentFile.getName(), true);
+		fileWriter.write(toString());
+		fileWriter.close();
+		System.out.println("The assignment File has been created!");
+
 	}
 
 	// helper method to print out the introduction
@@ -89,7 +117,7 @@ public class Assignment {
 	// post: returns a string
 	private String createQuestionIntro() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Welcome, Instructor: This assignment has " + numQuestions + " questions.\n");
+		sb.append("Welcome, Instructor: This assignment has " + numQuestions + " question(s).\n");
 		sb.append("For the sake of integrity, the questions will be randomized.\n");
 		sb.append("The format goes like this:\n");
 		sb.append("QUESTION: *type question here*\n");
@@ -116,19 +144,18 @@ public class Assignment {
 		Iterator<String> tempIt = allQuestions.iterator();
 		for (int i = 0; i < allQuestions.size(); i++) {
 			String question = tempIt.next();
-			sb.append("Question " + (i + 1) + ": " + question);
+			sb.append(question);
 			sb.append("\nAnswers:\n");
 			String[] temp = questionsAndAnswers.get(question);
-			sb.append(showAnswers(temp));
+			sb.append(getAllAnswers(temp));
 		}
 		return sb.toString();
-
 	}
 
 	// private helper method for toString() that shows the answers to the question
 	// pre: answerBox != null
 	// post: returns a string with the answers
-	private String showAnswers(String[] answerBox) {
+	private String getAllAnswers(String[] answerBox) {
 		if (answerBox == null) {
 			throw new IllegalArgumentException(
 					"Answers cannot be null! Attempted to call showAnswers");
@@ -138,6 +165,7 @@ public class Assignment {
 			temp += "" + (char) (i) + ": " + answerBox[i - A_CHAR];
 			temp += "\n";
 		}
+		temp += "CORRECT: " + encryptAnswer(answerBox[answerBox.length - 1]);
 		return temp;
 	}
 
@@ -154,7 +182,7 @@ public class Assignment {
 			String currentStudentAnswer = studentAnswers[question];
 			System.out.print("Question " + (question + 1) + ": " + currentCorrectAnswer + "\t"
 					+ currentStudentAnswer);
-			if(!currentCorrectAnswer.equals(currentStudentAnswer)) {
+			if (!currentCorrectAnswer.equals(currentStudentAnswer)) {
 				System.out.print(" DIFFERENT!");
 			}
 			System.out.println();
@@ -180,11 +208,10 @@ public class Assignment {
 			String tempAnswer = sc.nextLine();
 			studentAnswers[question] = "" + tempAnswer.toUpperCase().charAt(0);
 		}
-		System.out.println("CONGRATULATIONS FOR FINISHING: " + assignmentName);	
+		System.out.println("CONGRATULATIONS FOR FINISHING: " + assignmentName);
 		this.grade = calculateGrade();
 	}
-	
-	
+
 	private Grade calculateGrade() {
 		double numMissed = 0;
 		Set<String> questionSet = questionsAndAnswers.keySet();
@@ -194,11 +221,21 @@ public class Assignment {
 			String currentCorrectAnswer = questionsAndAnswers
 					.get(currentQuestion)[questionsAndAnswers.get(currentQuestion).length - 1];
 			String currentStudentAnswer = studentAnswers[question];
-			if(!currentCorrectAnswer.equals(currentStudentAnswer)) {
+			if (!currentCorrectAnswer.equals(currentStudentAnswer)) {
 				numMissed++;
 			}
-		}		
+		}
 		return new Grade(numMissed / numQuestions);
+	}
+	
+	
+	private String encryptAnswer(String toEncrypt) {
+		String newAnswer = "";
+		newAnswer += Integer.toHexString((char)toEncrypt.charAt(0));
+		for(int i = 0; i < assignmentName.length(); i++) {
+			newAnswer += Integer.toHexString((char)assignmentName.charAt(i));
+		}
+		return newAnswer;
 	}
 
 }
