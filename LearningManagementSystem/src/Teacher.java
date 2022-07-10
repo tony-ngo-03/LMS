@@ -13,7 +13,12 @@ public class Teacher {
 
 	private File teacherFile;
 
+	// constructor for the Teacher class
+	// pre: name and username != null
 	public Teacher(String name, String username) throws IOException {
+		if (name == null || username == null) {
+			throw new IllegalArgumentException("either name nor username can be null");
+		}
 		this.teacherName = name;
 		this.teacherUsername = username;
 		this.teacherFile = createTeacherFile();
@@ -22,6 +27,9 @@ public class Teacher {
 	}
 
 	public String showAllStudents() {
+		if (allStudentsUserNames == null) {
+			return "no students found!";
+		}
 		return allStudentsUserNames.toString();
 	}
 
@@ -30,8 +38,8 @@ public class Teacher {
 		File directory = new File(System.getProperty("user.dir"));
 
 		for (File file : directory.listFiles()) {
-			if (file.getName().length() >= 6) {
-				if (file.getName().substring(file.getName().length() - 5).equals("s.txt")) {
+			if (file.getName().length() >= 12) {
+				if (file.getName().substring(file.getName().length() - 11).equals("student.txt")) {
 					temp.add(file.getName());
 				}
 			}
@@ -59,11 +67,14 @@ public class Teacher {
 		System.out.println();
 		Assignment newAssignment = new Assignment(assignmentName, gradePercent, numQuestions,
 				teacherUsername);
-		newAssignment.createQuestions();
+		newAssignment.createQuestions(gradePercent, numQuestions);
+		// write to teacher
+
 		System.out.println(newAssignment.toString());
 		System.out.println(teacherFile.getName());
 		FileWriter fileWriter = new FileWriter(teacherFile.getName(), true);
-		fileWriter.append("Assignment: " + assignmentName);
+		fileWriter.append(
+				"Assignment: " + assignmentName + "\t" + gradePercent + "\t" + numQuestions + "\n");
 		fileWriter.close();
 
 		// assign to student
@@ -87,14 +98,22 @@ public class Teacher {
 		return newAssignment;
 	}
 
+	//
 	private void assignToStudent(Assignment assignment, String studentName) throws IOException {
-		FileWriter fileWriter = new FileWriter(studentName, true);
-		fileWriter.append("Assignment: " + assignment.getAssignmentName());
-		fileWriter.close();
+		File file = new File(studentName);
+		if (file.exists()) {
+			FileWriter fileWriter = new FileWriter(studentName, true);
+			fileWriter.append(
+					"Assignment: " + teacherUsername + "_" + assignment.getAssignmentName() + "\n");
+			fileWriter.close();
+		} else {
+			System.out.println("Error. That Student does not have a file!");
+		}
+
 	}
 
 	private File createTeacherFile() throws IOException {
-		File teacherInfo = new File(teacherUsername + ".txt");
+		File teacherInfo = new File(teacherUsername + "_teacher.txt");
 		if (teacherInfo.createNewFile()) {
 			System.out.println("Sucessfully created a new file! Welcome to the LMS.");
 		} else {

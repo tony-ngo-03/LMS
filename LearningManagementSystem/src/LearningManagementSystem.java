@@ -14,13 +14,13 @@ public class LearningManagementSystem {
 		// TODO Auto-generated method stub
 		Scanner sc = new Scanner(System.in);
 
-//		
-//		Assignment assignment = new Assignment("Assignment 1", 1, 2, "tony");
-//		assignment.createQuestions();
 		Introduction(sc);
 		allChoices(sc, teacher, student);
 	}
-
+	
+	// cycle through all choices for the user to use
+	// pre: either teacher OR student is null
+	// post: returns nothing
 	public static void allChoices(Scanner sc, Teacher teacher, Student student) throws IOException {
 		if ((teacher == null && student == null) || (teacher != null && student != null)) {
 			throw new IllegalArgumentException("User is neither a teacher nor a student");
@@ -35,7 +35,6 @@ public class LearningManagementSystem {
 				System.out.println("1. Create Assignment");
 				System.out.println("2. log out");
 				choice = sc.nextLine();
-
 				if (choice.equals("1")) {
 					teacher.createAssignment(sc);
 				}
@@ -91,9 +90,9 @@ public class LearningManagementSystem {
 			System.out.print("Please create a username: ");
 			String createUsername = sc.nextLine();
 			if (createOccupation.equals("teacher")) {
-				createUsername += "_t";
+				createUsername += "_teacher";
 			} else {
-				createUsername += "_s";
+				createUsername += "_student";
 			}
 			boolean canContinue = false;
 			while (!canContinue) {
@@ -157,12 +156,15 @@ public class LearningManagementSystem {
 	// pre: none
 	// post: logs into the system.
 	private static void logIn(Scanner sc, File logins) throws IOException {
+		System.out.print("Are you a teacher or a student: ");
+		String studentOrTeacher = sc.nextLine();
+		System.out.println();
 		System.out.print("Enter Username: ");
 		String loginUsername = sc.nextLine();
 		System.out.println();
 		System.out.print("Enter Password: ");
 		String loginPassword = putIntoHashCode(sc.nextLine());
-		String[] nameAndOcc = foundLogIn(loginUsername, loginPassword, logins);
+		String[] nameAndOcc = foundLogIn(loginUsername, loginPassword, studentOrTeacher, logins);
 		if (nameAndOcc == null) {
 			System.out.println("Log in Failed! Your username or password is wrong!");
 			System.out.print("Would you like to try again?");
@@ -173,7 +175,6 @@ public class LearningManagementSystem {
 				System.out.println("Okay! Thank you!");
 			}
 		}
-//		if (nameAndOcc[1].equals("teacher") || nameAndOcc[1].equals("student")) {
 		System.out.println("Log in Success!");
 		// after logging in, create new instance of teacher or student
 		if (nameAndOcc[1].equals("teacher")) {
@@ -188,14 +189,16 @@ public class LearningManagementSystem {
 	// teacher
 	// pre: file != null
 	// post: returns 'teacher', 'student', or 'not found!'
-	private static String[] foundLogIn(String username, String password, File file)
-			throws FileNotFoundException {
+	private static String[] foundLogIn(String username, String password, String studentOrTeacher,
+			File file) throws FileNotFoundException {
 		Scanner fileScanner = new Scanner(file);
 		while (fileScanner.hasNext()) {
 			String currentLine = fileScanner.nextLine();
 			Scanner lineScanner = new Scanner(currentLine);
-			String currentUsername = lineScanner.next();
-			if (currentUsername.substring(0, currentUsername.length() - 2).equals(username)
+			String currentUsername = lineScanner.next() + "_" + studentOrTeacher;
+
+			int index = currentUsername.indexOf("_");
+			if (currentUsername.substring(0, index).equals(username)
 					&& lineScanner.next().equals(password)) {
 				// 0 is name, 1 is occupation
 				String[] nameAndOcc = new String[2];

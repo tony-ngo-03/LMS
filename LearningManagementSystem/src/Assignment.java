@@ -1,5 +1,6 @@
 import java.util.TreeMap;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,12 +43,65 @@ public class Assignment {
 		this.questionsAndAnswers = new TreeMap<String, String[]>();
 		assignmentFile = createFileAssignment();
 	}
+
+	// default constructor fos an assignment
+	public Assignment() {
+		sc = new Scanner(System.in);
+	}
+
+	// constructor of an assignment from a file
+	public Assignment(File assignmentFile) throws FileNotFoundException {
+		if (assignmentFile == null || !assignmentFile.exists()) {
+			throw new IllegalArgumentException("File is null or does not exist!");
+		}
+		Scanner fileScanner = new Scanner(assignmentFile);
+
+		try {
+			gradePercent = fileScanner.nextDouble();
+			//fileScanner.nextLine();
+			int numQuestions = fileScanner.nextInt();
+			for(int i = 0; i < numQuestions; i++) {
+				String question = fileScanner.nextLine();
+				int questionIndex = question.indexOf(":");
+				question = question.substring(questionIndex);
+				// skip line
+				fileScanner.nextLine();
+				String[] answers = new String[5];
+				for(int answerNum = 0; i < answers.length - 1; answerNum++) {
+					// 2 is where the space is
+					answers[answerNum] = fileScanner.nextLine().substring(2);
+				}
+				String correctAnswer = answerDecoder(fileScanner.nextLine());
+				answers[answers.length - 1] = correctAnswer; 
+			}
+
+		} catch (Exception e) {
+			System.out.println("This file is not acceptable!");
+		}
+		fileScanner.close();
+	}
+
+	// private helper method to help decode the correct answer to rebuild the assignment
+	// pre: toDecode != null
+	// post: returns a string that is either "A" - "D"
+	private String answerDecoder(String toDecode) {
+		if(toDecode == null) {
+			throw new IllegalArgumentException("Cannot decode!!");
+		}
+		toDecode = toDecode.substring(0, 2);
+		int decoded = Integer.parseInt(toDecode, 16);
+		return "" + (char)decoded;
+ 	}
 	
-	
+	// getter method for the assignment name
+	// pre: none
+	// post: returns a string of the assignment name
 	public String getAssignmentName() {
 		return this.assignmentName;
 	}
 
+	
+	// 
 	private File createFileAssignment() throws IOException {
 		File assignmentFile = new File(teacherName + "_" + assignmentName + ".txt");
 		if (assignmentFile.createNewFile()) {
@@ -88,7 +142,7 @@ public class Assignment {
 	// fills the HashMap of Q and A for the assignment and writes it to the file
 	// pre: none
 	// post: updates
-	public void createQuestions() throws IOException {
+	public void createQuestions(double gradePercent, int numQuestions) throws IOException {
 		System.out.println(createQuestionIntro());
 		System.out.println("SIZE: " + numQuestions);
 		for (int qNum = 0; qNum < numQuestions; qNum++) {
@@ -106,6 +160,7 @@ public class Assignment {
 			questionsAndAnswers.put("Question " + (qNum + 1) + ":" + question, answers);
 		}
 		FileWriter fileWriter = new FileWriter(assignmentFile.getName(), true);
+		fileWriter.write(gradePercent + "\n" + numQuestions + "\n");
 		fileWriter.write(toString());
 		fileWriter.close();
 		System.out.println("The assignment File has been created!");
@@ -227,13 +282,12 @@ public class Assignment {
 		}
 		return new Grade(numMissed / numQuestions);
 	}
-	
-	
+
 	private String encryptAnswer(String toEncrypt) {
 		String newAnswer = "";
-		newAnswer += Integer.toHexString((char)toEncrypt.charAt(0));
-		for(int i = 0; i < assignmentName.length(); i++) {
-			newAnswer += Integer.toHexString((char)assignmentName.charAt(i));
+		newAnswer += Integer.toHexString((char) toEncrypt.charAt(0));
+		for (int i = 0; i < assignmentName.length(); i++) {
+			newAnswer += Integer.toHexString((char) assignmentName.charAt(i));
 		}
 		return newAnswer;
 	}
