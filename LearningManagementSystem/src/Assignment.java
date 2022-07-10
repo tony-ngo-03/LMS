@@ -54,29 +54,43 @@ public class Assignment {
 		if (assignmentFile == null || !assignmentFile.exists()) {
 			throw new IllegalArgumentException("File is null or does not exist!");
 		}
-		Scanner fileScanner = new Scanner(assignmentFile);
+		this.questionsAndAnswers = new TreeMap<String, String[]>();
+		this.grade = new Grade(-1);
+		sc = new Scanner(System.in);
+		// set up initial info
+		String tempName = assignmentFile.getName().substring(0,
+				assignmentFile.getName().length() - 3);
+		int underscoreIndex = tempName.indexOf("_");
+		this.teacherName = tempName.substring(0, underscoreIndex);
+		this.assignmentName = tempName.substring(underscoreIndex);
 
-		try {
-			gradePercent = fileScanner.nextDouble();
-			//fileScanner.nextLine();
-			int numQuestions = fileScanner.nextInt();
-			for(int i = 0; i < numQuestions; i++) {
-				String question = fileScanner.nextLine();
-				int questionIndex = question.indexOf(":");
-				question = question.substring(questionIndex);
-				// skip line
-				fileScanner.nextLine();
-				String[] answers = new String[5];
-				for(int answerNum = 0; i < answers.length - 1; answerNum++) {
-					// 2 is where the space is
-					answers[answerNum] = fileScanner.nextLine().substring(2);
-				}
-				String correctAnswer = answerDecoder(fileScanner.nextLine());
-				answers[answers.length - 1] = correctAnswer; 
+		Scanner fileScanner = new Scanner(assignmentFile);
+		String gradePercentage = fileScanner.nextLine();
+		String numQuestionString = fileScanner.nextLine();
+		this.gradePercent = Double.parseDouble(gradePercentage);
+		this.numQuestions = Integer.parseInt(numQuestionString);
+
+		for (int questionNum = 0; questionNum < numQuestions; questionNum++) {
+			// get the question
+			String question = fileScanner.nextLine();
+			int colonIndex = question.indexOf(":");
+			question = question.substring(colonIndex + 1);
+			// skip the "ANSWERS"
+			fileScanner.nextLine();
+			// get the 4 answers
+			String[] answerBox = new String[5];
+			for (int answerNum = 0; answerNum < 4; answerNum++) {
+				String answer = fileScanner.nextLine().substring(3);
+				answerBox[answerNum] = answer;
 			}
 
-		} catch (Exception e) {
-			System.out.println("This file is not acceptable!");
+			// get the correct answer
+			String correctAnswer = answerDecoder(fileScanner.nextLine().substring(9));
+			answerBox[answerBox.length - 1] = correctAnswer;
+
+			// insert into the questionsAndAnswers
+			this.questionsAndAnswers.put(question, answerBox);
+
 		}
 		fileScanner.close();
 	}
@@ -85,14 +99,14 @@ public class Assignment {
 	// pre: toDecode != null
 	// post: returns a string that is either "A" - "D"
 	private String answerDecoder(String toDecode) {
-		if(toDecode == null) {
-			throw new IllegalArgumentException("Cannot decode!!");
+		if (toDecode == null) {
+			throw new IllegalArgumentException("cannot decode null");
 		}
 		toDecode = toDecode.substring(0, 2);
 		int decoded = Integer.parseInt(toDecode, 16);
-		return "" + (char)decoded;
- 	}
-	
+		return "" + (char) decoded;
+	}
+
 	// getter method for the assignment name
 	// pre: none
 	// post: returns a string of the assignment name
@@ -100,8 +114,9 @@ public class Assignment {
 		return this.assignmentName;
 	}
 
-	
-	// 
+	// creates the .txt file of the assignment
+	// pre: none
+	// post: returns the file that the assignment is linked to
 	private File createFileAssignment() throws IOException {
 		File assignmentFile = new File(teacherName + "_" + assignmentName + ".txt");
 		if (assignmentFile.createNewFile()) {
@@ -199,7 +214,7 @@ public class Assignment {
 		Iterator<String> tempIt = allQuestions.iterator();
 		for (int i = 0; i < allQuestions.size(); i++) {
 			String question = tempIt.next();
-			sb.append(question);
+			sb.append("Question " + (i + 1) + ": " + question);
 			sb.append("\nAnswers:\n");
 			String[] temp = questionsAndAnswers.get(question);
 			sb.append(getAllAnswers(temp));
@@ -267,6 +282,9 @@ public class Assignment {
 		this.grade = calculateGrade();
 	}
 
+	// calculates the grade by comparing the correct answer to the wrong answer
+	// pre: none
+	// post: returns a grade
 	private Grade calculateGrade() {
 		double numMissed = 0;
 		Set<String> questionSet = questionsAndAnswers.keySet();
@@ -283,7 +301,14 @@ public class Assignment {
 		return new Grade(numMissed / numQuestions);
 	}
 
+	// encrypts the answer by converting the ascii value to hexidecimal and adding the assignment
+	// name in ascii to hexidecial
+	// pre: toEncrypt != null
+	// post: returns a string of the encrypted answer
 	private String encryptAnswer(String toEncrypt) {
+		if (toEncrypt == null) {
+			throw new IllegalArgumentException("Cannot encrypt null!");
+		}
 		String newAnswer = "";
 		newAnswer += Integer.toHexString((char) toEncrypt.charAt(0));
 		for (int i = 0; i < assignmentName.length(); i++) {

@@ -24,7 +24,7 @@ public class Student {
 	}
 
 	private File createStudentFile() throws IOException {
-		File studentFile = new File(studentUsername + ".txt");
+		File studentFile = new File(studentUsername + "_student.txt");
 		if (studentFile.createNewFile()) {
 			System.out.println("Student file sucessfully created! Welcome to the LMS");
 		} else {
@@ -34,13 +34,15 @@ public class Student {
 	}
 
 	private Assignment[] getAllAssignments(File assignmentFile) throws FileNotFoundException {
+		if (assignmentFile == null) {
+			throw new IllegalArgumentException("Student file is null");
+		}
 		Assignment[] temp = new Assignment[5];
 		int counter = 0;
 		Scanner fileScanner = new Scanner(assignmentFile);
 		while (fileScanner.hasNextLine()) {
-			String assignmentName = fileScanner.nextLine().substring(13);
-			System.out.println(assignmentName);
-			File foundAssignment = new File(assignmentName);
+			String assignmentName = fileScanner.nextLine().substring(12);
+			File foundAssignment = new File(assignmentName + ".txt");
 			temp[counter] = new Assignment(foundAssignment);
 			counter++;
 			if (counter >= temp.length) {
@@ -48,8 +50,6 @@ public class Student {
 			}
 		}
 		fileScanner.close();
-		System.out.println("ASSIGNMENT FOUND!!!!");
-		System.out.println(temp[0].toString());
 		return temp;
 	}
 
@@ -58,15 +58,18 @@ public class Student {
 	// post: returns a copy of the |orig| with more space
 	private Assignment[] resize(Assignment[] orig) {
 		Assignment[] temp = new Assignment[orig.length * 2];
-
 		for (int i = 0; i < orig.length; i++) {
 			temp[i] = orig[i];
 		}
-
 		return temp;
 	}
 
 	public void takeAssignment() {
 		System.out.println("Here is your list of assignments that you can take!");
+		for (int assignmentNum = 0; assignmentNum < this.allAssignments.length
+				- 1; assignmentNum++) {
+			System.out.println("" + (assignmentNum + 1) + ". "
+					+ this.allAssignments[assignmentNum].getAssignmentName());
+		}
 	}
 }

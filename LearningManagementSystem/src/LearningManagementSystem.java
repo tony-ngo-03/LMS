@@ -17,7 +17,7 @@ public class LearningManagementSystem {
 		Introduction(sc);
 		allChoices(sc, teacher, student);
 	}
-	
+
 	// cycle through all choices for the user to use
 	// pre: either teacher OR student is null
 	// post: returns nothing
@@ -45,10 +45,14 @@ public class LearningManagementSystem {
 			}
 			// student choices
 			else {
-				System.out.println("1. log out");
+				System.out.println("1. Take Assignments!");
+				System.out.println("2. log out");
 
 				choice = sc.nextLine();
 				if (choice.equals("1")) {
+					student.takeAssignment();
+				}
+				if (choice.equals("2")) {
 					choice = "log out";
 				}
 			}

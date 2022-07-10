@@ -1,9 +1,0 @@
-1.0
-1
-Question 1:Color?
-Answers:
-A: Blue
-B: Black
-C: Yello
-D: Green
-CORRECT: 41434f4c4f525331

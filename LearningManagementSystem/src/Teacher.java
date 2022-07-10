@@ -91,7 +91,7 @@ public class Teacher {
 			}
 		} else {
 			System.out.print("\nWhat is the student's username: ");
-			String specificStudent = sc.nextLine();
+			String specificStudent = sc.nextLine() + "_student.txt";
 			assignToStudent(newAssignment, specificStudent);
 		}
 		System.out.println("Assigned to student(s)!");
