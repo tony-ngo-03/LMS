@@ -23,9 +23,12 @@ public class Teacher {
 		this.teacherUsername = username;
 		this.teacherFile = createTeacherFile();
 		this.allStudentsUserNames = getAllStudents();
-		System.out.println(showAllStudents());
+		System.out.println("These are all of the students: " + showAllStudents());
 	}
 
+	// shows all of the found files that contain _student
+	// pre: allStudentsUsernames != null
+	// post: returns a string of all of the students usernames
 	public String showAllStudents() {
 		if (allStudentsUserNames == null) {
 			return "no students found!";
@@ -33,6 +36,9 @@ public class Teacher {
 		return allStudentsUserNames.toString();
 	}
 
+	// scans the repo and stores all student's files names
+	// pre: none
+	// post: returns an ArrayList<String> of all students
 	private ArrayList<String> getAllStudents() {
 		ArrayList<String> temp = new ArrayList<String>();
 		File directory = new File(System.getProperty("user.dir"));
@@ -47,11 +53,14 @@ public class Teacher {
 		return temp;
 	}
 
+	// public getter for this teacher's file
 	public File getTeacherFile() {
 		return teacherFile;
 	}
 
-	// could possibly move this to teacher?
+	// creates a new assignment and assigns them to students
+	// pre: none
+	// post: returns an Assignment (new file), assigned to student, written to teacher file
 	public Assignment createAssignment(Scanner sc) throws IOException {
 		// create name of the assignment
 		System.out.print("What is the name of the assignment: ");
@@ -98,7 +107,9 @@ public class Teacher {
 		return newAssignment;
 	}
 
-	//
+	// assigns an assignmnet to a student
+	// pre: none
+	// post: writes to respective files!
 	private void assignToStudent(Assignment assignment, String studentName) throws IOException {
 		File file = new File(studentName);
 		if (file.exists()) {

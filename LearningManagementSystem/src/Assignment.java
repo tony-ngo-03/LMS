@@ -43,14 +43,28 @@ public class Assignment {
 		this.questionsAndAnswers = new TreeMap<String, String[]>();
 		assignmentFile = createFileAssignment();
 	}
+	
+	
+	// public getter method 
+	// pre: assignemntFile != null
+	// post: returns a File of the assignment
+	public File getAssignmentFile() {
+		if(this.assignmentFile == null) {
+			throw new IllegalArgumentException();
+		}
+		return this.assignmentFile;
+	}
 
-	// default constructor fos an assignment
+	// default constructor for an assignment
 	public Assignment() {
 		sc = new Scanner(System.in);
 	}
 
 	// constructor of an assignment from a file
+	// pre: assignemntFile must exist and the assignmentFile != null
+	// post: creates a new Assignment
 	public Assignment(File assignmentFile) throws FileNotFoundException {
+		this.assignmentFile = assignmentFile;
 		if (assignmentFile == null || !assignmentFile.exists()) {
 			throw new IllegalArgumentException("File is null or does not exist!");
 		}
@@ -68,8 +82,9 @@ public class Assignment {
 		String gradePercentage = fileScanner.nextLine();
 		String numQuestionString = fileScanner.nextLine();
 		this.gradePercent = Double.parseDouble(gradePercentage);
-		this.numQuestions = Integer.parseInt(numQuestionString);
 
+		this.numQuestions = Integer.parseInt(numQuestionString);
+		this.studentAnswers = new String[this.numQuestions];
 		for (int questionNum = 0; questionNum < numQuestions; questionNum++) {
 			// get the question
 			String question = fileScanner.nextLine();
@@ -293,12 +308,16 @@ public class Assignment {
 			String currentQuestion = questionIterator.next();
 			String currentCorrectAnswer = questionsAndAnswers
 					.get(currentQuestion)[questionsAndAnswers.get(currentQuestion).length - 1];
+			System.out.println("CURRENT CORRECT ANSWER: " + currentCorrectAnswer);
 			String currentStudentAnswer = studentAnswers[question];
+			System.out.println("CURRENT STUDENT ANSWER: " + currentStudentAnswer);
+			System.out.println(currentCorrectAnswer.equals(currentStudentAnswer));
 			if (!currentCorrectAnswer.equals(currentStudentAnswer)) {
 				numMissed++;
 			}
 		}
-		return new Grade(numMissed / numQuestions);
+
+		return new Grade(100 * (numQuestions - numMissed) / numQuestions);
 	}
 
 	// encrypts the answer by converting the ascii value to hexidecimal and adding the assignment
@@ -316,5 +335,9 @@ public class Assignment {
 		}
 		return newAnswer;
 	}
-
+	public void appendToAssignment(String toAppend) throws IOException {
+		FileWriter fileWriter = new FileWriter(this.assignmentFile, true);
+		fileWriter.append("\n" + toAppend);
+		fileWriter.close();
+	}
 }

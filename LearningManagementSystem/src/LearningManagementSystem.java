@@ -93,6 +93,10 @@ public class LearningManagementSystem {
 			// create username
 			System.out.print("Please create a username: ");
 			String createUsername = sc.nextLine();
+			while (createUsername.contains(":") || createUsername.contains("_")) {
+				System.out.println("Please do not use ':' or '_' in your username!");
+				createUsername = sc.nextLine();
+			}
 			if (createOccupation.equals("teacher")) {
 				createUsername += "_teacher";
 			} else {
