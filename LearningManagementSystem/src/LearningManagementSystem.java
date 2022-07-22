@@ -33,12 +33,20 @@ public class LearningManagementSystem {
 			// teacher choices
 			if (teacher != null && student == null) {
 				System.out.println("1. Create Assignment");
-				System.out.println("2. log out");
+				System.out.println("2. Send Message!");
+				System.out.println("3. View Message(s)!");
+				System.out.println("4. log out");
 				choice = sc.nextLine();
 				if (choice.equals("1")) {
 					teacher.createAssignment(sc);
 				}
 				if (choice.equals("2")) {
+					teacher.sendMessage(sc);
+				}
+				if (choice.equals("3")) {
+					teacher.viewAllMessages();
+				}
+				if (choice.equals("4")) {
 					choice = "log out";
 				}
 
@@ -46,13 +54,14 @@ public class LearningManagementSystem {
 			// student choices
 			else {
 				System.out.println("1. Take Assignments!");
-				System.out.println("2. log out");
+				System.out.println("2. View Message(s)!");
+				System.out.println("3. log out");
 
 				choice = sc.nextLine();
 				if (choice.equals("1")) {
 					student.takeAssignment();
 				}
-				if (choice.equals("2")) {
+				if (choice.equals("3")) {
 					choice = "log out";
 				}
 			}
@@ -65,14 +74,14 @@ public class LearningManagementSystem {
 	// post: creates a new instance of the teacher or a student
 	public static void Introduction(Scanner sc) throws IOException {
 		System.out.println("Welcome to the LMS.");
-		System.out.println("Please Select: ");
-		System.out.println("Please type in 'log in' or 'create'");
-		System.out.println("\nLOG IN\tCREATE ACCOUNT");
+		System.out.println("Please only use numbers to answer questions unless otherwise prompted");
+		System.out.println("Please Select:\n1. Login\n2. Create Account\n");
+		System.out.print("CHOICE: ");
 		String choice = sc.nextLine();
 		File logins = createLogins();
-		if (choice.toLowerCase().equals("log in")) {
+		if (choice.toLowerCase().equals("1")) {
 			logIn(sc, logins);
-		} else if (choice.toLowerCase().equals("create")) {
+		} else if (choice.toLowerCase().equals("2")) {
 			// get first name
 			System.out.print("What is your first name: ");
 			String createFirstName = sc.nextLine();
@@ -164,8 +173,16 @@ public class LearningManagementSystem {
 	// pre: none
 	// post: logs into the system.
 	private static void logIn(Scanner sc, File logins) throws IOException {
-		System.out.print("Are you a teacher or a student: ");
-		String studentOrTeacher = sc.nextLine();
+		System.out.println("Are you a teacher or a student: \n");
+		System.out.println("1. Teacher\n2. Student\n");
+		System.out.print("CHOICE: ");
+		String studentOrTeacher = sc.nextLine().toLowerCase();
+		while (!studentOrTeacher.equals("1") || studentOrTeacher.equals("2")) {
+			System.out.println("That is not a valid choice! Please pick one.");
+			System.out.println("\n1. Teacher\n2. Student\n");
+			System.out.print("CHOICE: ");
+			studentOrTeacher = sc.nextLine().toLowerCase();
+		}
 		System.out.println();
 		System.out.print("Enter Username: ");
 		String loginUsername = sc.nextLine();

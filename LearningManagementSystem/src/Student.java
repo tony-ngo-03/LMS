@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Student {
@@ -12,6 +13,8 @@ public class Student {
 	private Assignment[] allAssignments;
 	private int numAssignments;
 	private File studentFile;
+
+	private ArrayList<Message> allMessages;
 
 	// public constructor for the student
 	// pre: studentName != null, username != null
@@ -25,6 +28,7 @@ public class Student {
 		this.studentFile = createStudentFile();
 		this.allAssignments = getAllAssignments(this.studentFile);
 		System.out.println("Welcome! " + this.studentName);
+		allMessages = getAllMessages();
 	}
 
 	// creates a .txt file for the student
@@ -169,5 +173,37 @@ public class Student {
 		}
 		this.numAssignments--;
 		return temp;
+	}
+	
+	// public method to view all active messages
+	// pre: none
+	// post: none, prints out messages
+	public void viewAllMessages() {
+		for(int i = 0; i < allMessages.size(); i++) {
+			String toWrite = "";
+			System.out.println("" + (i + 1) + ": ");
+		}
+	}
+
+	
+	// private method to help get all messages to fill up |allMessages|
+	// pre: none
+	// post: returns an ArrayList of Messages that have the student's name in it!
+	private ArrayList<Message> getAllMessages() {
+		File directory = new File(System.getProperty("user.dir"));
+		ArrayList<Message> allMessages = new ArrayList<Message>();
+
+		for (File file : directory.listFiles()) {
+			if (file.getName().charAt(0) == 'm') {
+				Message tempMessage = new Message(file, false);
+				if (tempMessage.senderGetter().equals(studentUsername)
+						|| tempMessage.receiverGetter().equals(studentUsername)) {
+					allMessages.add(tempMessage);
+				}
+			}
+		}
+
+		return allMessages;
+
 	}
 }
