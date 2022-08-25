@@ -174,18 +174,32 @@ public class Student {
 		this.numAssignments--;
 		return temp;
 	}
-	
+
 	// public method to view all active messages
 	// pre: none
 	// post: none, prints out messages
 	public void viewAllMessages() {
-		for(int i = 0; i < allMessages.size(); i++) {
+		for (int i = 0; i < allMessages.size(); i++) {
 			String toWrite = "";
-			System.out.println("" + (i + 1) + ": ");
+			Message tempMessage = allMessages.get(i);
+			// student is receiver
+			if (tempMessage.receiverGetter().equals(studentUsername)) {
+				toWrite = "Sender: " + tempMessage.senderGetter();
+			}
+			// student is sender
+			if (tempMessage.senderGetter().equals(studentUsername)) {
+				toWrite = "Receiver: " + tempMessage.receiverGetter();
+			}
+
+			System.out.println("" + (i + 1) + ": " + toWrite);
 		}
+		System.out.println(allMessages.size() + 1 + ": Exit");
+		
+		
+		
+		System.out.println("CHOICE: ");
 	}
 
-	
 	// private method to help get all messages to fill up |allMessages|
 	// pre: none
 	// post: returns an ArrayList of Messages that have the student's name in it!
@@ -195,7 +209,11 @@ public class Student {
 
 		for (File file : directory.listFiles()) {
 			if (file.getName().charAt(0) == 'm') {
+				System.out.println(file.getName());
 				Message tempMessage = new Message(file, false);
+				System.out.println(tempMessage.senderGetter());
+				System.out.println(tempMessage.receiverGetter());
+				System.out.println("student username" + studentUsername);
 				if (tempMessage.senderGetter().equals(studentUsername)
 						|| tempMessage.receiverGetter().equals(studentUsername)) {
 					allMessages.add(tempMessage);

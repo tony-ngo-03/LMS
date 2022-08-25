@@ -5,25 +5,28 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class LearningManagementSystem {
-	private static Teacher teacher;
+	private static Instructor instructor;
 	private static Student student;
+	private static Admin admin;
 
-	private static String userName;
+	private static String userFirstName;
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		Scanner sc = new Scanner(System.in);
 
 		Introduction(sc);
-		allChoices(sc, teacher, student);
+		allChoices(sc, instructor, student, admin);
 	}
 
 	// cycle through all choices for the user to use
 	// pre: either teacher OR student is null
 	// post: returns nothing
-	public static void allChoices(Scanner sc, Teacher teacher, Student student) throws IOException {
-		if ((teacher == null && student == null) || (teacher != null && student != null)) {
-			throw new IllegalArgumentException("User is neither a teacher nor a student");
+	public static void allChoices(Scanner sc, Instructor instructor, Student student, Admin admin)
+			throws IOException {
+		if (instructor == null && student == null && admin == null) {
+			throw new IllegalStateException(
+					"There is neither an instructor, student, nor admin active!");
 		}
 		System.out.println("\n\n\n");
 		String choice = "";
@@ -31,41 +34,28 @@ public class LearningManagementSystem {
 		System.out.println("Welcome, please select the option by typing the number.");
 		while (!choice.equals("log out")) {
 			// teacher choices
-			if (teacher != null && student == null) {
-				System.out.println("1. Create Assignment");
-				System.out.println("2. Send Message!");
-				System.out.println("3. View Message(s)!");
-				System.out.println("4. log out");
+			if (admin != null) {
+				System.out.println("1. Add Course to Instructor");
+				System.out.println("2. Log out");
+				System.out.print("\n> ");
 				choice = sc.nextLine();
+
 				if (choice.equals("1")) {
-					teacher.createAssignment(sc);
+					admin.addCourseToPerson();
 				}
 				if (choice.equals("2")) {
-					teacher.sendMessage(sc);
-				}
-				if (choice.equals("3")) {
-					teacher.viewAllMessages();
-				}
-				if (choice.equals("4")) {
-					choice = "log out";
-				}
-
-			}
-			// student choices
-			else {
-				System.out.println("1. Take Assignments!");
-				System.out.println("2. View Message(s)!");
-				System.out.println("3. log out");
-
-				choice = sc.nextLine();
-				if (choice.equals("1")) {
-					student.takeAssignment();
-				}
-				if (choice.equals("3")) {
 					choice = "log out";
 				}
 			}
+			if (instructor != null) {
+
+			}
+			if (student != null) {
+
+			}
+
 		}
+		
 	}
 
 	// introduction for the program
@@ -78,73 +68,135 @@ public class LearningManagementSystem {
 		System.out.println("Please Select:\n1. Login\n2. Create Account\n");
 		System.out.print("CHOICE: ");
 		String choice = sc.nextLine();
+		while (!choice.equals("1") && !choice.equals("2")) {
+			System.out.println("That is the wrong ");
+		}
 		File logins = createLogins();
 		if (choice.toLowerCase().equals("1")) {
 			logIn(sc, logins);
 		} else if (choice.toLowerCase().equals("2")) {
-			// get first name
-			System.out.print("What is your first name: ");
-			String createFirstName = sc.nextLine();
-			userName = createFirstName;
-			System.out.println();
-
-			// choose either teacher or student
-			System.out.print("Are you a teacher or a student: ");
-			String createOccupation = sc.nextLine().toLowerCase();
-			System.out.println();
-			// validate choice for either teacher or student
-			while (!createOccupation.toLowerCase().equals("teacher")
-					&& !createOccupation.toLowerCase().equals("student")) {
-				System.out.println("That is not a valid choice. ");
-				System.out.print("Are you a teacher or a student: ");
-				createOccupation = sc.nextLine().toLowerCase();
-			}
-			// create username
-			System.out.print("Please create a username: ");
-			String createUsername = sc.nextLine();
-			while (createUsername.contains(":") || createUsername.contains("_")) {
-				System.out.println("Please do not use ':' or '_' in your username!");
-				createUsername = sc.nextLine();
-			}
-			if (createOccupation.equals("teacher")) {
-				createUsername += "_teacher";
-			} else {
-				createUsername += "_student";
-			}
-			boolean canContinue = false;
-			while (!canContinue) {
-				if (canUseUsername(logins, createUsername)) {
-					canContinue = true;
-					System.out.println();
-					// create password
-					System.out.print("please create a password: ");
-					String createPassword = putIntoHashCode(sc.nextLine());
-					System.out.println();
-
-					// write firstName, userName, password, and occupation into the file.
-					FileWriter fileWriter = new FileWriter(logins.getName(), true);
-					fileWriter.write(createUsername + "\t" + createPassword + "\t" + createFirstName
-							+ "\t" + createOccupation + "\n");
-					System.out.println("Successfully created an account!");
-
-					// after creating an account, create new instance of either teacher or student
-					if (createOccupation.equals("teacher")) {
-						teacher = new Teacher(createFirstName, createUsername);
-					} else {
-						student = new Student(createFirstName, createUsername);
-					}
-					fileWriter.close();
-				} else {
-					System.out.println("This username is already taken");
-					System.out.print("Please choose a new one: ");
-					createUsername = sc.nextLine();
-				}
-			}
+			createAccount(sc, logins);
 
 		} else {
 			// TODO: create loop for not valid entry
 		}
 
+	}
+
+	private static void createAccount(Scanner sc, File logins) throws IOException {
+		// get first name
+		userFirstName = getUserFirstName(sc);
+
+		// get instructor or teacher
+		System.out.println("What is your occupation?\n");
+		System.out.println("1. Instructor");
+		System.out.println("2. Student");
+		System.out.println("3. Admin");
+		System.out.print("> ");
+		String userOccupationChoice = sc.nextLine();
+		// error correcting
+		while (!userOccupationChoice.equals("1") && !userOccupationChoice.equals("2")
+				&& !userOccupationChoice.equals("3")) {
+			System.out.println("That is not a valid choice. Please use numbers.");
+			System.out.println("What is your occupation?\n");
+			System.out.println("1. Instructor");
+			System.out.println("2. Student");
+			System.out.println("3. Admin");
+			System.out.print("> ");
+			userOccupationChoice = sc.nextLine();
+		}
+		if (userOccupationChoice.equals("1")) {
+			userOccupationChoice = "instructor";
+		} else if (userOccupationChoice.equals("2")) {
+			userOccupationChoice = "student";
+		} else {
+			userOccupationChoice = "admin";
+		}
+
+		String[] credentials = new String[2];
+		credentials = createCredentials(credentials, sc, logins);
+
+		// Write credentials to file
+		FileWriter fileWriter = new FileWriter(logins, true);
+		fileWriter.append(credentials[0] + "\t" + credentials[1] + "\n");
+		fileWriter.close();
+
+		// create the actual username.txt
+		createFirstFile(credentials[0], userOccupationChoice);
+	}
+
+	private static void createFirstFile(String username, String occupation) throws IOException {
+		File newFile = new File(username + ".txt");
+		if (newFile.createNewFile()) {
+			System.out.println("File successfully created, " + userFirstName + "!");
+		} else {
+			System.out.println("File already exists! Please contact admin.");
+		}
+		FileWriter newFileWriter = new FileWriter(newFile, true);
+		newFileWriter.append(userFirstName + "\n" + occupation);
+		newFileWriter.close();
+
+	}
+
+	// asks the user for their log in and password
+	// pre: none, handled by parent
+	// post: returns a String[] with 0 being username and 1 being password
+	private static String[] createCredentials(String[] credentials, Scanner sc, File logins)
+			throws FileNotFoundException {
+
+		System.out.println("What is your username (case sensitive)?");
+		System.out.print("> ");
+		credentials[0] = sc.nextLine();
+		while (credentials[0].equals("")) {
+			System.out.println("That is not a valid username. Please enter a new username.");
+			System.out.print("> ");
+			credentials[0] = sc.nextLine();
+		}
+		while (!canUseUsername(logins, credentials[0])) {
+			System.out.println("That username is already taken. Please enter a new username.");
+			System.out.print("> ");
+			credentials[0] = sc.nextLine();
+		}
+
+		System.out.println("What is your password (case sensitive)?");
+		System.out.print("> ");
+		credentials[1] = putIntoHashCode(sc.nextLine());
+
+		while (credentials[1].equals("")) {
+			System.out.println("That is not a valid password. Please enter a new password.");
+			System.out.print("> ");
+			credentials[1] = sc.nextLine();
+		}
+		return credentials;
+
+	}
+
+	// private method to get the user's first name and to confirm their name.
+	// pre: sc != null
+	private static String getUserFirstName(Scanner sc) {
+		if (sc == null) {
+			throw new IllegalArgumentException("Scanner is somehow null");
+		}
+		System.out.println("Welcome! What is your first name?");
+		System.out.print("> ");
+		String tempFirstName = sc.nextLine();
+
+		System.out.println("Are you sure that your name is " + tempFirstName + "? (y/n)");
+		System.out.print("> ");
+		String choice = sc.nextLine();
+		while (choice.equals("n")) {
+			System.out.println("Welcome! What is your first name?");
+			System.out.print("> ");
+			tempFirstName = sc.nextLine();
+
+			System.out.println("Are you sure that your name is " + tempFirstName + "? (y/n)");
+			System.out.print("> ");
+			choice = sc.nextLine();
+
+		}
+
+		System.out.println("Welcome to the LMS, " + tempFirstName + ".");
+		return tempFirstName;
 	}
 
 	// helper method to determine if the attemptedUsername is already in use
@@ -173,71 +225,71 @@ public class LearningManagementSystem {
 	// pre: none
 	// post: logs into the system.
 	private static void logIn(Scanner sc, File logins) throws IOException {
-		System.out.println("Are you a teacher or a student: \n");
-		System.out.println("1. Teacher\n2. Student\n");
-		System.out.print("CHOICE: ");
-		String studentOrTeacher = sc.nextLine().toLowerCase();
-		while (!studentOrTeacher.equals("1") || studentOrTeacher.equals("2")) {
-			System.out.println("That is not a valid choice! Please pick one.");
-			System.out.println("\n1. Teacher\n2. Student\n");
-			System.out.print("CHOICE: ");
-			studentOrTeacher = sc.nextLine().toLowerCase();
+		System.out.println("Welcome back! Please enter your username: ");
+		System.out.print("> ");
+		String attemptedUsername = sc.nextLine();
+
+		System.out.println("What is your password?");
+		System.out.print("> ");
+		String attemptedPassword = putIntoHashCode(sc.nextLine());
+
+		boolean found = foundLogIn(attemptedUsername, attemptedPassword, logins);
+
+		while (!found) {
+			System.out.println(
+					"We are sorry. That account is not found. Please reenter your information");
+			logIn(sc, logins);
 		}
-		System.out.println();
-		System.out.print("Enter Username: ");
-		String loginUsername = sc.nextLine();
-		System.out.println();
-		System.out.print("Enter Password: ");
-		String loginPassword = putIntoHashCode(sc.nextLine());
-		String[] nameAndOcc = foundLogIn(loginUsername, loginPassword, studentOrTeacher, logins);
-		if (nameAndOcc == null) {
-			System.out.println("Log in Failed! Your username or password is wrong!");
-			System.out.print("Would you like to try again?");
-			String choice = sc.nextLine();
-			if (choice.toLowerCase().charAt(0) == 'y') {
-				logIn(sc, logins);
-			} else {
-				System.out.println("Okay! Thank you!");
-			}
-		}
-		System.out.println("Log in Success!");
-		// after logging in, create new instance of teacher or student
-		if (nameAndOcc[1].equals("teacher")) {
-			teacher = new Teacher(nameAndOcc[0], loginUsername);
+
+		System.out.println("Welcome back!");
+		String[] userInfo = getUserInfoFromLogin(new File(attemptedUsername + ".txt"));
+		System.out.println("Log in Success! Welcome back " + userInfo[0]);
+
+		// user is an instructor
+		if (userInfo[1].equals("instructor")) {
+
+		} else if (userInfo[1].equals("student")) {
+
 		} else {
-			student = new Student(nameAndOcc[0], loginUsername);
+			admin = new Admin(userInfo[0], userInfo[1]);
 		}
 
 	}
 
-	// private helper method to log the user in and also figure out if they are a student or a
-	// teacher
-	// pre: file != null
-	// post: returns 'teacher', 'student', or 'not found!'
-	private static String[] foundLogIn(String username, String password, String studentOrTeacher,
-			File file) throws FileNotFoundException {
-		Scanner fileScanner = new Scanner(file);
-		while (fileScanner.hasNext()) {
-			String currentLine = fileScanner.nextLine();
-			Scanner lineScanner = new Scanner(currentLine);
-			String currentUsername = lineScanner.next() + "_" + studentOrTeacher;
+	// scans the first two lines of the user file to get name and occupation
+	// pre: none
+	// post: returns a String[] with 0 being first name and 1 being occupation
+	private static String[] getUserInfoFromLogin(File userFile) throws FileNotFoundException {
+		String[] userInfo = new String[2];
+		Scanner userFileScanner = new Scanner(userFile);
+		userInfo[0] = userFileScanner.nextLine();
+		userInfo[1] = userFileScanner.nextLine();
+		userFileScanner.close();
+		return userInfo;
 
-			int index = currentUsername.indexOf("_");
-			if (currentUsername.substring(0, index).equals(username)
-					&& lineScanner.next().equals(password)) {
-				// 0 is name, 1 is occupation
-				String[] nameAndOcc = new String[2];
-				nameAndOcc[0] = lineScanner.next();
-				userName = nameAndOcc[0];
+	}
+
+	// private method to check all known login info to log in
+	// pre: none
+	// post: returns true if the account was found, false otherwise.
+	private static boolean foundLogIn(String username, String password, File file)
+			throws FileNotFoundException {
+		Scanner fileScanner = new Scanner(file);
+
+		while (fileScanner.hasNextLine()) {
+			String currentLine = fileScanner.nextLine();
+			Scanner currentLineScanner = new Scanner(currentLine);
+			if (currentLineScanner.next().equals(username)
+					&& currentLineScanner.next().equals(password)) {
+				currentLineScanner.close();
 				fileScanner.close();
-				nameAndOcc[1] = lineScanner.next();
-				lineScanner.close();
-				return nameAndOcc;
+				return true;
 			}
-			lineScanner.close();
+			currentLineScanner.close();
+
 		}
 		fileScanner.close();
-		return null;
+		return false;
 	}
 
 	// creates the file to be used for username/password management

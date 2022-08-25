@@ -1,6 +1,0 @@
-Assignment: COLORS	1.0	1
-Assignment: COLORS2	1.0	1
-
-MESSAGE:message_josh__homework01.txt
-MESSAGE:message_josh__test01.txt
-MESSAGE:message_josh_tony_hello.txt
