@@ -5,173 +5,73 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Message {
+
+	private String instructor;
+	private String student;
+	private String subject;
+
 	private File messageFile;
 
-	private String sender;
-	private String receiver;
+	private Scanner sc;
 
-	private String subject;
-	private String messageName;
-
-	// constructor for message class
-	// teacherOrStudent is true if teacher, false if student
-	// for naming conventions
-	public Message(String sender, String receiver, String subject, boolean teacherOrStudent)
-			throws IOException {
-		this.sender = sender;
-		this.receiver = receiver;
+	//
+	public Message(String instructor, String student, String subject) throws IOException {
+		this.instructor = instructor;
+		this.student = student;
 		this.subject = subject;
-		this.messageName = "message_";
-		if (teacherOrStudent) {
-			this.messageName += this.sender + "_" + this.receiver;
-		} else {
-			this.messageName += this.receiver + "_" + this.sender;
-		}
-		this.messageName += "_" + this.subject;
-
 		this.messageFile = getMessageFile();
+		sc = new Scanner(System.in);
 	}
 
-	// construct the message from a file!
-	// pre: file != null && file.exists()
-	public Message(File file, boolean teacherOrStudent) {
-		if (file == null || !file.exists()) {
-			throw new IllegalArgumentException("file is null or the file does not exist");
-		}
-		this.messageFile = file;
-		this.messageName = this.messageFile.getName();
-		this.sender = getSender(teacherOrStudent);
-		this.receiver = getReceiver(teacherOrStudent);
-		this.subject = getSubject();
-
-	}
-
-	// public getter method for this message file
-	// pre: messageFile != null
-	// post: returns the file requested
-	public File getMessage() {
-		if (this.messageFile == null) {
-			throw new IllegalStateException("File is not yet created for this message!");
-		}
-		return this.messageFile;
-	}
-
+	// getter method for the entire message name
+	// pre: none
+	// post:
 	public String getMessageName() {
 		return this.messageFile.getName();
 	}
 
-	// private helper method used for getting the file for initial use
+	// creates a message file if it already does not exist
 	// pre: none
-	// post: returns a file of the message
+	// post: creates or obtains the message file to be used
 	private File getMessageFile() throws IOException {
-		File file = new File(this.messageName + ".txt");
-
-		if (!file.createNewFile()) {
-			System.out.println("DEBUGGING: Message Found!");
+		String test = "m_" + this.instructor + "_" + this.student + "-" + subject + ".txt";
+		System.out.println(test);
+		File messageFile = new File(test);
+		if (messageFile.createNewFile()) {
+			System.out.println("Message File created!");
 		} else {
-			System.out.println("DEBUGGING: ");
+			System.out.println("Message File found!");
 		}
-		return file;
+
+		return messageFile;
 	}
 
-	// appends to the file as a new message!
-	// pre: message != null
-	// post: the file is changed!
-	public void write(String message) throws IOException {
-		if (message == null) {
-			throw new IllegalArgumentException("Message cannot be null");
+	// method to actually write to the message file!
+	// pre: this.messageFile != null
+	// post: writes to the message file
+	public void sendMessage(String firstName, String message) throws IOException {
+		if (this.messageFile == null) {
+			throw new IllegalStateException("The message file is not found!");
 		}
+
 		FileWriter fileWriter = new FileWriter(this.messageFile, true);
-		fileWriter.append("\n" + sender + ": " + message);
+		fileWriter.append("\n" + firstName + ": " + message + "\n");
 		fileWriter.close();
 	}
 
-	// public method to get the last message sent in the file
-	// pre: none
-	// post: returns a string of the last message in that conversation
+	// scans the entire file to get the last message sent
+	// pre: messageFile != null
 	public String getLastMessage() throws FileNotFoundException {
-		Scanner fileScanner = new Scanner(messageFile);
-		String last = "";
+		if (this.messageFile == null) {
+			throw new IllegalStateException("The message file is not found!");
+		}
+		Scanner fileScanner = new Scanner(this.messageFile);
+		String lastMessage = "";
 		while (fileScanner.hasNextLine()) {
-			last = fileScanner.nextLine();
+			lastMessage = fileScanner.nextLine();
 		}
 		fileScanner.close();
-		return last;
-	}
-
-	// gets the reciever of the message for easier viewing!
-	// pre: teacherOrStudent is true for teacher, false for student
-	// post: returns a string of the receiver of the message
-	private String getReceiver(boolean teacherOrStudent) {
-		int counter = teacherOrStudent ? 2 : 1;
-		String name = "";
-		for (int i = 0; i < this.getMessageName().length(); i++) {
-			if (this.getMessageName().charAt(i) == '_') {
-				counter--;
-			}
-			if (counter == 0) {
-				name += "" + this.getMessageName().charAt(i);
-			}
-		}
-		return name.substring(1);
-	}
-
-	private String getSender(boolean teacherOrStudent) {
-		int counter = teacherOrStudent ? 1 : 2;
-		String name = "";
-		for (int i = 0; i < this.getMessageName().length(); i++) {
-			if (this.getMessageName().charAt(i) == '_') {
-				counter--;
-			}
-			if (counter == 0) {
-				name += "" + this.getMessageName().charAt(i);
-			}
-		}
-		return name.substring(1);
-	}
-
-	private String getSubject() {
-		int counter = 3;
-		String subject = "";
-		for (int i = 0; i < this.getMessageName().length(); i++) {
-			if (this.getMessageName().charAt(i) == '_') {
-				counter--;
-			}
-			if (counter == 0) {
-				subject += "" + this.getMessageName().charAt(i);
-			}
-		}
-
-		return subject.substring(1, subject.length() - 4);
-
-	}
-
-	public String senderGetter() {
-		return this.sender;
-	}
-
-	public String receiverGetter() {
-		return this.receiver;
-	}
-
-	public String subjectGetter() {
-		return this.subject;
-	}
-
-	// the entire message in 1 string
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		try {
-			Scanner fileScanner = new Scanner(messageFile);
-			while (fileScanner.hasNextLine()) {
-				sb.append(fileScanner.nextLine() + "\n");
-			}
-			fileScanner.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		return sb.toString();
-
+		return lastMessage;
 	}
 
 }

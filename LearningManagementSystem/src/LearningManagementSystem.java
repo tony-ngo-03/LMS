@@ -36,26 +36,49 @@ public class LearningManagementSystem {
 			// teacher choices
 			if (admin != null) {
 				System.out.println("1. Add Course to Instructor");
-				System.out.println("2. Log out");
+				System.out.println("2. Add Course to Student");
+				System.out.println("3. Send Message to Student");
+				System.out.println("4. Create a Course");
+				System.out.println("5. Log out");
 				System.out.print("\n> ");
 				choice = sc.nextLine();
 
 				if (choice.equals("1")) {
-					admin.addCourseToPerson();
+					admin.addCourseToInstructor();
 				}
 				if (choice.equals("2")) {
+					admin.addCourseToStudent();
+				}
+				if (choice.equals("3")) {
+
+				}
+				if (choice.equals("4")) {
+					admin.createCourse();
+				}
+				else {
 					choice = "log out";
 				}
 			}
 			if (instructor != null) {
-
+				System.out.println("1. Send Message to Student");
+				System.out.println("2. Create an assignment");
+				System.out.println("3. Quit");
+				choice = sc.nextLine();
+				if (choice.equals("1")) {
+					instructor.sendMessage();
+				}
+				if (choice.equals("2")) {
+					instructor.createAssignment();
+				} else {
+					choice = "log out";
+				}
 			}
 			if (student != null) {
 
 			}
 
 		}
-		
+
 	}
 
 	// introduction for the program
@@ -247,11 +270,12 @@ public class LearningManagementSystem {
 
 		// user is an instructor
 		if (userInfo[1].equals("instructor")) {
+			instructor = new Instructor(userInfo[0], attemptedUsername);
 
 		} else if (userInfo[1].equals("student")) {
-
+			student = new Student(userInfo[0], attemptedUsername);
 		} else {
-			admin = new Admin(userInfo[0], userInfo[1]);
+			admin = new Admin(userInfo[0], attemptedUsername);
 		}
 
 	}

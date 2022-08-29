@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Student {
-	private String studentName;
-	private String studentUsername;
+	private String firstName;
+	private String username;
 	private Grade[] allGrades;
 
 	private Scanner sc;
@@ -18,30 +18,40 @@ public class Student {
 
 	// public constructor for the student
 	// pre: studentName != null, username != null
-	public Student(String studentName, String username) throws IOException {
-		if (studentName == null || username == null) {
+	public Student(String firstName, String username) throws IOException {
+		if (firstName == null || username == null) {
 			throw new IllegalArgumentException();
 		}
 		sc = new Scanner(System.in);
-		this.studentName = studentName;
-		this.studentUsername = username;
-		this.studentFile = createStudentFile();
-		this.allAssignments = getAllAssignments(this.studentFile);
-		System.out.println("Welcome! " + this.studentName);
-		allMessages = getAllMessages();
+		this.firstName = firstName;
+		this.username = username;
+		this.studentFile = studentFile();
+		// this.allAssignments = getAllAssignments(this.studentFile);
+		System.out.println("Welcome! " + this.firstName);
+	}
+
+	// constructor to recreate the student
+	public Student(File file) throws FileNotFoundException {
+		sc = new Scanner(System.in);
+		this.studentFile = file;
+		Scanner fileScanner = new Scanner(this.studentFile);
+		this.firstName = fileScanner.nextLine();
+		this.username = this.studentFile.getName()
+				.substring(this.studentFile.getName().length() - 4);
+		
+
+	}
+	
+	
+	public String getUsername() {
+		return this.username;
 	}
 
 	// creates a .txt file for the student
 	// pre: none
 	// post: if a .txt file does not exist, then it is created
-	private File createStudentFile() throws IOException {
-		File studentFile = new File(studentUsername + "_student.txt");
-		if (studentFile.createNewFile()) {
-			System.out.println("Student file sucessfully created! Welcome to the LMS");
-		} else {
-			System.out.println("Student file found! Welcome Back.");
-		}
-		return studentFile;
+	private File studentFile() throws IOException {
+		return new File(username + ".txt");
 	}
 
 	// gets all assignments that are avaliable and that the student has not taken
@@ -86,7 +96,7 @@ public class Student {
 		while (sc.hasNextLine()) {
 			String taken = sc.nextLine();
 			int colonIndex = taken.indexOf(':');
-			if (taken.substring(0, colonIndex).contains(studentUsername)) {
+			if (taken.substring(0, colonIndex).contains(username)) {
 				return false;
 			}
 		}
@@ -136,8 +146,7 @@ public class Student {
 			System.out.println("\n");
 			chosenAssignment.takeAssignment();
 			System.out.println(chosenAssignment.viewGrade());
-			chosenAssignment
-					.appendToAssignment(studentUsername + ":" + chosenAssignment.viewGrade());
+			chosenAssignment.appendToAssignment(username + ":" + chosenAssignment.viewGrade());
 			this.allAssignments = removeFromList(chosen);
 		}
 	}
@@ -175,53 +184,4 @@ public class Student {
 		return temp;
 	}
 
-	// public method to view all active messages
-	// pre: none
-	// post: none, prints out messages
-	public void viewAllMessages() {
-		for (int i = 0; i < allMessages.size(); i++) {
-			String toWrite = "";
-			Message tempMessage = allMessages.get(i);
-			// student is receiver
-			if (tempMessage.receiverGetter().equals(studentUsername)) {
-				toWrite = "Sender: " + tempMessage.senderGetter();
-			}
-			// student is sender
-			if (tempMessage.senderGetter().equals(studentUsername)) {
-				toWrite = "Receiver: " + tempMessage.receiverGetter();
-			}
-
-			System.out.println("" + (i + 1) + ": " + toWrite);
-		}
-		System.out.println(allMessages.size() + 1 + ": Exit");
-		
-		
-		
-		System.out.println("CHOICE: ");
-	}
-
-	// private method to help get all messages to fill up |allMessages|
-	// pre: none
-	// post: returns an ArrayList of Messages that have the student's name in it!
-	private ArrayList<Message> getAllMessages() {
-		File directory = new File(System.getProperty("user.dir"));
-		ArrayList<Message> allMessages = new ArrayList<Message>();
-
-		for (File file : directory.listFiles()) {
-			if (file.getName().charAt(0) == 'm') {
-				System.out.println(file.getName());
-				Message tempMessage = new Message(file, false);
-				System.out.println(tempMessage.senderGetter());
-				System.out.println(tempMessage.receiverGetter());
-				System.out.println("student username" + studentUsername);
-				if (tempMessage.senderGetter().equals(studentUsername)
-						|| tempMessage.receiverGetter().equals(studentUsername)) {
-					allMessages.add(tempMessage);
-				}
-			}
-		}
-
-		return allMessages;
-
-	}
 }

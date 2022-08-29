@@ -13,7 +13,7 @@ public class Assignment {
 	private Grade grade;
 	private String assignmentName;
 	private double gradePercent;
-	private String teacherName;
+	private String courseName;
 
 	private File assignmentFile;
 	// format: Question: {A, B, C, D, Correct}
@@ -30,11 +30,11 @@ public class Assignment {
 	// constructor for the assignment
 	// basic information
 	// pre: numQuestions
-	public Assignment(String name, double gradePercentage, int numQuestions, String teacherName)
+	public Assignment(String name, double gradePercentage, int numQuestions, String courseName)
 			throws IOException {
 		sc = new Scanner(System.in);
 		this.assignmentName = name;
-		this.teacherName = teacherName;
+		this.courseName = courseName;
 		this.gradePercent = gradePercentage;
 		this.numQuestions = numQuestions;
 		studentAnswers = new String[numQuestions];
@@ -43,13 +43,12 @@ public class Assignment {
 		this.questionsAndAnswers = new TreeMap<String, String[]>();
 		assignmentFile = createFileAssignment();
 	}
-	
-	
-	// public getter method 
+
+	// public getter method
 	// pre: assignemntFile != null
 	// post: returns a File of the assignment
 	public File getAssignmentFile() {
-		if(this.assignmentFile == null) {
+		if (this.assignmentFile == null) {
 			throw new IllegalArgumentException();
 		}
 		return this.assignmentFile;
@@ -75,7 +74,7 @@ public class Assignment {
 		String tempName = assignmentFile.getName().substring(0,
 				assignmentFile.getName().length() - 3);
 		int underscoreIndex = tempName.indexOf("_");
-		this.teacherName = tempName.substring(0, underscoreIndex);
+		this.courseName = tempName.substring(0, underscoreIndex);
 		this.assignmentName = tempName.substring(underscoreIndex);
 
 		Scanner fileScanner = new Scanner(assignmentFile);
@@ -133,7 +132,7 @@ public class Assignment {
 	// pre: none
 	// post: returns the file that the assignment is linked to
 	private File createFileAssignment() throws IOException {
-		File assignmentFile = new File(teacherName + "_" + assignmentName + ".txt");
+		File assignmentFile = new File(courseName + "_" + assignmentName + ".txt");
 		if (assignmentFile.createNewFile()) {
 			System.out.println("Sucessfully created Assignment!");
 		} else {
@@ -335,6 +334,7 @@ public class Assignment {
 		}
 		return newAnswer;
 	}
+
 	public void appendToAssignment(String toAppend) throws IOException {
 		FileWriter fileWriter = new FileWriter(this.assignmentFile, true);
 		fileWriter.append("\n" + toAppend);

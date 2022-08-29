@@ -1,4 +1,5 @@
-Tony
-instructor
+test
+student
 MESSAGE: m_tonyngo03_student-test.txt
+
 COURSE: Intro to Math
