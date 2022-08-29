@@ -1,9 +1,0 @@
-1.0
-1
-Question 1: Question 1:Did you read the Syllabus
-Answers:
-A: Yes
-B: No
-C: No
-D: No
-CORRECT: 4153796c6c61627573205175697a

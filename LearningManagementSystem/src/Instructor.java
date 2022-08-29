@@ -67,7 +67,9 @@ public class Instructor {
 			String curr = fileScanner.nextLine();
 
 			if (curr.length() > 7 && curr.substring(0, 7).equals("COURSE:")) {
-				Course tempCourse = new Course(curr.substring(7), this.username);
+				System.out.println("INSIDE INSTRUCTOR");
+				Course tempCourse = new Course(curr.substring(8), this.username);
+				System.out.println(tempCourse.getCourseName());
 				allCourses.add(tempCourse);
 			}
 		}
@@ -109,11 +111,11 @@ public class Instructor {
 
 	private void writeMessageInFiles(String messageName, String receiverName) throws IOException {
 		FileWriter fileWriter = new FileWriter(instructorFile, true);
-		fileWriter.append("MESSAGE: " + messageName + "\n");
+		fileWriter.append("\nMESSAGE: " + messageName + "\n");
 		fileWriter.close();
 
 		FileWriter otherWriter = new FileWriter(new File(receiverName + ".txt"), true);
-		otherWriter.append("MESSAGE: " + messageName + "\n");
+		otherWriter.append("\nMESSAGE: " + messageName + "\n");
 		otherWriter.close();
 	}
 

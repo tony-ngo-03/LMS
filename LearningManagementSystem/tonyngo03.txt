@@ -1,4 +1,3 @@
-Tony
+tony
 instructor
-MESSAGE: m_tonyngo03_student-test.txt
 COURSE: Intro to Math

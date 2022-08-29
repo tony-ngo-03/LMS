@@ -95,15 +95,15 @@ public class Admin {
 
 		FileWriter studentFileWriter = new FileWriter(new File(chosenStudentUsername + ".txt"),
 				true);
-		studentFileWriter.append("COURSE: " + courseName + "\n");
+		studentFileWriter.append("\nCOURSE: " + courseName + "\n");
 		studentFileWriter.close();
 
 		File courseFile = newCourse.getCourseFile();
 
 		FileWriter fileWriter = new FileWriter(courseFile, true);
 
-		fileWriter.append("INSTRUCTOR:" + chosenInstructorUsername + "\n");
-		fileWriter.append("STUDENT:" + chosenStudentUsername + "\n");
+		fileWriter.append("\nINSTRUCTOR:" + chosenInstructorUsername + "\n");
+		fileWriter.append("\nSTUDENT:" + chosenStudentUsername + "\n");
 		fileWriter.close();
 
 	}

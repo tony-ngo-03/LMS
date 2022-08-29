@@ -28,11 +28,12 @@ public class Course {
 	}
 
 	private File createCourseFile() throws IOException {
+		System.out.println("INSIDE COURSE.JAVA");
 		File courseFile = new File(this.courseName + ".txt");
-		if (courseFile.createNewFile()) {
-			System.out.println("New Course Created!");
-		} else {
+		if (courseFile.exists()) {
 			System.out.println("Course file already exists!");
+		} else {
+			courseFile.createNewFile();
 		}
 		return courseFile;
 	}
@@ -68,7 +69,7 @@ public class Course {
 		newAssignment.createQuestions(assignmentPercentage, numAssignmentQuestions);
 
 		FileWriter fileWriter = new FileWriter(this.courseFile, true);
-		fileWriter.append("ASSIGNMENT:" + assignmentName);
+		fileWriter.append("\nASSIGNMENT:" + assignmentName + "\n");
 		fileWriter.close();
 		this.allAssignments.add(newAssignment);
 		assignToStudents(newAssignment);
@@ -81,7 +82,7 @@ public class Course {
 			File studentFile = student.getStudentFile();
 			FileWriter studentFileWriter = new FileWriter(studentFile, true);
 
-			studentFileWriter.append(assignment.getAssignmentName() + "\n");
+			studentFileWriter.append("\n" + assignment.getAssignmentName() + "\n");
 			studentFileWriter.close();
 		}
 	}

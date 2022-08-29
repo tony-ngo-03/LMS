@@ -54,8 +54,7 @@ public class LearningManagementSystem {
 				}
 				if (choice.equals("4")) {
 					admin.createCourse();
-				}
-				else {
+				} else {
 					choice = "log out";
 				}
 			}
@@ -156,7 +155,7 @@ public class LearningManagementSystem {
 			System.out.println("File already exists! Please contact admin.");
 		}
 		FileWriter newFileWriter = new FileWriter(newFile, true);
-		newFileWriter.append(userFirstName + "\n" + occupation);
+		newFileWriter.append(userFirstName + "\n" + occupation + "\n");
 		newFileWriter.close();
 
 	}
