@@ -61,13 +61,15 @@ public class LearningManagementSystem {
 			if (instructor != null) {
 				System.out.println("1. Send Message to Student");
 				System.out.println("2. Create an assignment");
-				System.out.println("3. Quit");
+				System.out.println("3. View all Messages");
+				System.out.println("4. Quit");
 				choice = sc.nextLine();
 				if (choice.equals("1")) {
 					instructor.sendMessage();
-				}
-				if (choice.equals("2")) {
+				} else if (choice.equals("2")) {
 					instructor.createAssignment();
+				} else if (choice.equals("3")) {
+					instructor.viewAllMessages();
 				} else {
 					choice = "log out";
 				}
@@ -145,8 +147,16 @@ public class LearningManagementSystem {
 
 		// create the actual username.txt
 		createFirstFile(credentials[0], userOccupationChoice);
+
+		// now let the user log in
+		logIn(sc, logins);
+
 	}
 
+	// creates the actual file when first creating an account, used to store firstName and
+	// occupation
+	// pre: none
+	// post: creates a new file and adds basic information to it.
 	private static void createFirstFile(String username, String occupation) throws IOException {
 		File newFile = new File(username + ".txt");
 		if (newFile.createNewFile()) {
@@ -195,6 +205,7 @@ public class LearningManagementSystem {
 
 	// private method to get the user's first name and to confirm their name.
 	// pre: sc != null
+	// post: returns a String that is the user's first name
 	private static String getUserFirstName(Scanner sc) {
 		if (sc == null) {
 			throw new IllegalArgumentException("Scanner is somehow null");

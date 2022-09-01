@@ -23,6 +23,7 @@ public class Instructor {
 		instructorFile = getInstructorFile();
 		this.allCourses = getCourses();
 		sc = new Scanner(System.in);
+		this.allMessages = getAllMessages();
 	}
 
 	// getter method to get username of the instructor
@@ -132,6 +133,53 @@ public class Instructor {
 		Course chosenCourse = allCourses.get(courseChoice - 1);
 
 		chosenCourse.createAssignment();
+	}
+
+	private ArrayList<Message> getAllMessages() {
+		ArrayList<Message> allMessages = new ArrayList<Message>();
+		File dir = new File(System.getProperty("user.dir"));
+
+		File[] allFiles = dir.listFiles();
+
+		for (int i = 0; i < allFiles.length; i++) {
+			File checkFile = allFiles[i];
+			if (checkFile.getName().substring(0, 2).equals("m_")) {
+				allMessages.add(new Message(checkFile));
+			}
+		}
+		return allMessages;
+	}
+
+	public void viewAllMessages() throws IOException {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < allMessages.size(); i++) {
+			sb.append((i + 1) + ". " + allMessages.get(i).getInfo() + "\n");
+		}
+		sb.append((allMessages.size() + 1) + ". Exit");
+		System.out.println(sb.toString());
+
+		System.out.println("Please pick a number.");
+
+		int choice = Integer.parseInt(sc.nextLine());
+
+		if (choice != allMessages.size() + 1) {
+			Message chosen = allMessages.get(choice - 1);
+			System.out.println("Last message: " + chosen.getLastMessage());
+
+			System.out.println("Would you like to write something? (y/n)");
+			System.out.print("\n> ");
+			String willRespond = sc.nextLine();
+
+			if (willRespond.toLowerCase().equals("y")) {
+				System.out.println("What would you like to write? ");
+				System.out.print("\n> ");
+				String message = sc.nextLine();
+
+				chosen.sendMessage(this.firstName, message);
+			}
+
+		}
+
 	}
 
 }

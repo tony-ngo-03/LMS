@@ -12,15 +12,27 @@ public class Message {
 
 	private File messageFile;
 
-	private Scanner sc;
-
-	//
 	public Message(String instructor, String student, String subject) throws IOException {
 		this.instructor = instructor;
 		this.student = student;
 		this.subject = subject;
 		this.messageFile = getMessageFile();
-		sc = new Scanner(System.in);
+	}
+
+	public Message(File file) {
+		this.messageFile = file;
+		String messageName = this.messageFile.getName();
+		messageName = messageName.substring(2);
+		this.instructor = messageName.substring(0, messageName.indexOf("_"));
+
+		this.student = messageName.substring(messageName.indexOf("_") + 1,
+				messageName.indexOf("-"));
+
+		this.subject = messageName.substring(messageName.indexOf("-") + 1,
+				messageName.indexOf("."));
+
+		System.out.println(getInfo());
+
 	}
 
 	// getter method for the entire message name
@@ -55,7 +67,7 @@ public class Message {
 		}
 
 		FileWriter fileWriter = new FileWriter(this.messageFile, true);
-		fileWriter.append("\n" + firstName + ": " + message + "\n");
+		fileWriter.append(firstName + ": " + message + "\n");
 		fileWriter.close();
 	}
 
@@ -68,10 +80,22 @@ public class Message {
 		Scanner fileScanner = new Scanner(this.messageFile);
 		String lastMessage = "";
 		while (fileScanner.hasNextLine()) {
-			lastMessage = fileScanner.nextLine();
+			String temp = fileScanner.nextLine();
+			if (!temp.equals("")) {
+				lastMessage = temp;
+			}
+
 		}
 		fileScanner.close();
 		return lastMessage;
+	}
+
+	// gets the vital information of any message
+	// pre: none
+	// post: returns the instructor, student, and subject of the message
+	public String getInfo() {
+		return "Instructor: " + this.instructor + "\tStudent: " + this.student + "\tSubject: "
+				+ this.subject;
 	}
 
 }
